@@ -1,13 +1,14 @@
-# bun-devops-template
+# shlink-mcp
 
-A GitHub template for Bun-based DevOps projects: the quality tooling, git
-hooks and agent tooling are prewired — bring your own code. There is no
-entry point (`index.ts` was intentionally removed); start from whatever the
-derived project needs.
+A [Model Context Protocol](https://modelcontextprotocol.io) server for
+[Shlink](https://shlink.io), the self-hosted URL shortener: it exposes
+Shlink's REST API as tools for MCP clients. The server itself is not
+implemented yet — the repository currently holds the prewired quality
+tooling, git hooks and agent tooling, ready for the first source files.
 
-Generated with `bun init` (Bun v1.4.2); the tooling set is distilled from
-[rtx-workspace](https://github.com/andrielson/rtx-workspace), the first
-project built on it.
+Derived from
+[bun-devops-template](https://github.com/andrielson/bun-devops-template), a
+GitHub template for Bun-based DevOps projects.
 
 ## Prerequisites
 
@@ -15,13 +16,12 @@ project built on it.
 - **ShellCheck** (0.10+) — shell linting (`lint:sh` and the pre-commit
   gate). Shell _formatting_ needs no host binary: it goes through Prettier
   and `prettier-plugin-sh`.
-- **Docker** — optional; only for derived projects that validate Compose
-  files or build images.
+- **Docker** — optional; only if this project ends up validating Compose
+  files or building images.
 
 ## Getting started
 
-Use this repository as a template on GitHub ("Use this template"), clone
-the result, then:
+Clone the repository, then:
 
 ```bash
 bun install
@@ -60,7 +60,7 @@ touch the same file:
 `.shellcheckrc` holds the ShellCheck policy (bash dialect, optional rules
 enabled, known-noise codes disabled). `lint:sh` targets every tracked
 shell script (`git ls-files`), so it respects `.gitignore` and stays a
-no-op until the project adds scripts.
+no-op until shell scripts are added.
 
 ## Git hooks (Husky)
 
@@ -87,7 +87,7 @@ extension for markdown, YAML, shell and Dockerfile.
 
 ## Agent tooling
 
-The template ships coding-agent tooling alongside the code:
+The repository ships coding-agent tooling alongside the code:
 
 - **DeepWiki MCP** — `.mcp.json` declares the `deepwiki` MCP server
   (`https://mcp.deepwiki.com/mcp`), a free, no-authentication service that

@@ -10,7 +10,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - `bun install` — install dependencies (also activates the git hooks, via the `prepare` script)
 - `bun run <file>` — run a script directly
-- `bun test` — run all tests (Bun's built-in runner; a repo with no test files is fine); `bun test path/to/file.test.ts` for one file, `bun test -t "<name>"` for one test
+- `bun test` — run all tests (Bun's built-in runner; until test files exist it exits 1 with `error: 0 test files matching ...` — expected, not something to fix); `bun test path/to/file.test.ts` for one file, `bun test -t "<name>"` for one test
 - `bun run lint` / `bun run lint:fix` — Biome check (TS family), with and without auto-fix
 - `bun run lint:sh` — ShellCheck over the tracked shell scripts (a no-op until `.sh`/`.bash` files are added)
 - `bun run format` / `bun run format:check` — Prettier write/check (markdown, YAML, shell, Dockerfile)
