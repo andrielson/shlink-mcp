@@ -30,8 +30,8 @@ GitHub template for Bun-based DevOps projects.
 - **ShellCheck** (0.10+) — shell linting (`lint:sh` and the pre-commit
   gate). Shell _formatting_ needs no host binary: it goes through Prettier
   and `prettier-plugin-sh`.
-- **Docker** — optional; only if this project ends up validating Compose
-  files or building images.
+- **Docker** (with Compose) — runs the ephemeral test Shlink (see
+  [Ephemeral test Shlink](#ephemeral-test-shlink)).
 
 ## Getting started
 
@@ -58,6 +58,30 @@ setup.
 | `bun run typecheck`    | `tsc --noEmit`                                                                         |
 | `bun test`             | Run the test suite ([Bun's test runner](https://bun.com/docs/test-writer) is built in) |
 | `bun build <entry>`    | Bundle an entrypoint (`.ts`, `.html`, `.css`)                                          |
+
+## Ephemeral test Shlink
+
+Integration tests and local development run against a disposable Shlink
+instance defined in [`tests/compose.yaml`](tests/compose.yaml): a pinned
+latest-stable Shlink on its default SQLite database, with no mounted volumes —
+every start is a fresh instance (the initial API key is applied on first boot,
+~6s to healthy), and every stop discards all data.
+
+```bash
+docker compose --file tests/compose.yaml up --detach --wait # start, wait healthy
+docker compose --file tests/compose.yaml down               # stop, discard all data
+```
+
+| Setting              | Value                                                           |
+| -------------------- | --------------------------------------------------------------- |
+| Base URL             | `http://localhost:18080` (override with `SHLINK_TEST_PORT`)     |
+| API key              | `shlink-mcp-test-key` (override with `SHLINK_TEST_API_KEY`)     |
+| Default short domain | `s.test`                                                        |
+| Health endpoint      | `GET /rest/health` (no auth) — the compose healthcheck polls it |
+
+The REST API lives under `/rest/v3` and authenticates every call with the
+`X-Api-Key` header; the [API documentation](https://shlink.io/documentation/api-docs/)
+is the canonical reference.
 
 ## Lint, formatting and type checking
 

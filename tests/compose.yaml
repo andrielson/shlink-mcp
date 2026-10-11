@@ -1,0 +1,38 @@
+# Ephemeral Shlink for integration tests and local development.
+#
+# Deliberately stateless: no volumes are mounted, so every `up` starts from a
+# fresh SQLite database (Shlink's default) and INITIAL_API_KEY is applied on
+# first boot; `down` discards everything. The key is therefore predictable for
+# tests without any shared state between runs.
+#
+# The image tag is pinned to the exact version; bump it deliberately when
+# "latest stable" moves (the API surface this targets is inventoried in
+# docs/research/shlink-rest-api-inventory.md).
+
+name: shlink-mcp-test
+
+services:
+  shlink:
+    image: shlinkio/shlink:5.1.7
+    ports:
+      - target: 8080
+        published: "${SHLINK_TEST_PORT:-18080}"
+    environment:
+      INITIAL_API_KEY: "${SHLINK_TEST_API_KEY:-shlink-mcp-test-key}"
+      DEFAULT_DOMAIN: "s.test"
+      IS_HTTPS_ENABLED: "false"
+    # 127.0.0.1, not localhost: the server binds IPv4 only, and busybox wget
+    # would otherwise resolve localhost to ::1 and refuse the connection.
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--spider",
+          "--quiet",
+          "http://127.0.0.1:8080/rest/health",
+        ]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+      start_period: 10s
