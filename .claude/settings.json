@@ -1,0 +1,9 @@
+{
+  "enabledPlugins": {
+    "mattpocock-skills@claude-plugins-official": true
+  },
+  "enabledMcpjsonServers": ["deepwiki"],
+  "permissions": {
+    "allow": ["mcp__deepwiki__*"]
+  }
+}
