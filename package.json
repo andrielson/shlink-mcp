@@ -5,6 +5,7 @@
     "format:check": "prettier --check .",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
+    "lint:sh": "git ls-files -- '*.sh' '*.bash' ':!:.claude/worktrees' | xargs --no-run-if-empty shellcheck",
     "prepare": "husky",
     "typecheck": "tsc --noEmit"
   },
@@ -14,6 +15,7 @@
     "husky": "9.1.7",
     "lint-staged": "17.6.0",
     "prettier": "3.9.10",
+    "prettier-plugin-sh": "0.20.2",
     "typescript": "7.0.2"
   },
   "packageManager": "bun@1.4.3"

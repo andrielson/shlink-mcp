@@ -11,8 +11,10 @@
 *.json
 *.jsonc
 
+.claude/worktrees/
+.husky/_
+
 .gitignore
 .dockerignore
-bun.lock
 
-.husky/_
+bun.lock
