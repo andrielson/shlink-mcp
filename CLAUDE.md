@@ -4,7 +4,19 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository state
 
-`andrielson/shlink-mcp`, derived from the [bun-devops-template](https://github.com/andrielson/bun-devops-template) (created with `bun init`; `packageManager` pins Bun 1.4+). The name states the intended project — an MCP server for [Shlink](https://shlink.io), the self-hosted URL shortener — but nothing of it exists yet: there is no entry point (`index.ts` was intentionally removed). What is prewired is the quality tooling: Biome and Prettier with strict ownership, ShellCheck, `tsc`, Husky hooks (activated by `bun install`), and the agent tooling below. The `.husky/*.ts` hooks count as TypeScript inputs, so `bun run typecheck` passes even before any source file exists. When work on the server starts, research Shlink's REST API through DeepWiki against `shlinkio/shlink` (see "Agent tooling").
+`andrielson/shlink-mcp`, derived from the [bun-devops-template](https://github.com/andrielson/bun-devops-template) (created with `bun init`; `packageManager` pins Bun 1.4+). This repository builds a [Model Context Protocol](https://modelcontextprotocol.io) (MCP) server for [Shlink](https://shlink.io), the self-hosted URL shortener: it will expose Shlink's REST API as tools for MCP clients. The implementation has not started — there is no entry point (`index.ts` was intentionally removed). What is prewired is the quality tooling: Biome and Prettier with strict ownership, ShellCheck, `tsc`, Husky hooks (activated by `bun install`), and the agent tooling below. The `.husky/*.ts` hooks count as TypeScript inputs, so `bun run typecheck` passes even before any source file exists. When work on the server starts, begin from the Shlink resources below and the `mcp-server-dev` plugin, and research Shlink's REST API through DeepWiki against `shlinkio/shlink` and `shlinkio/shlink-js-sdk` (see "Agent tooling").
+
+## Shlink resources
+
+Upstream context for anything that touches Shlink's API:
+
+- [shlink.io](https://shlink.io) — the Shlink project site: what Shlink is and does.
+- [shlink.io/documentation](https://shlink.io/documentation) — the canonical human-readable reference for the REST API: endpoints, parameters, behavior.
+- [js-sdk.shlink.io](https://js-sdk.shlink.io) — docs for the official TypeScript SDK; the closest thing to a map of how the REST API translates to TypeScript.
+- [shlinkio/shlink-js-sdk](https://github.com/shlinkio/shlink-js-sdk) — the SDK source, for when a question is best answered by code.
+- [shlinkio/shlink](https://github.com/shlinkio/shlink) — Shlink itself: the REST API's implementation, for internals-level questions.
+
+An official TypeScript SDK therefore exists. Whether this server builds on it or talks raw HTTP to the REST API is **not yet decided** — evaluate both when implementation starts, before writing any client code.
 
 ## Commands
 
@@ -53,7 +65,8 @@ For Bun API details, read the docs shipped in `node_modules/bun-types/docs/**.md
 - **Triage labels** — vocabulary: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`. See `docs/agents/triage-labels.md`.
 - **Domain docs** — one `CONTEXT.md` + `docs/adr/` at the repo root, created lazily when terms or decisions actually get resolved. See `docs/agents/domain.md`.
 - **mattpocock-skills plugin** — enabled in `.claude/settings.json`; it provides the engineering skills the workflow docs refer to.
-- **Third-party research** — whenever information about a third-party project is needed (APIs, CLI, runtime behavior, releases, internals), research it through the `deepwiki` MCP against that project's GitHub repository (e.g. Bun via `oven-sh/bun`, Shlink via `shlinkio/shlink`). The `deepwiki` skill in `.claude/skills/deepwiki/` describes the workflow; the MCP server is declared in `.mcp.json` and pre-approved in `.claude/settings.json` (`enabledMcpjsonServers` plus the `mcp__deepwiki__*` allow rule), so it connects without a first-use prompt.
+- **MCP development** — the `mcp-server-dev` Claude Code plugin (enabled in `.claude/settings.json`) is the reference tooling for building the server itself: deployment model, tool-design patterns, packaging. Its `mcp-server-dev:build-mcp-server` skill is the entry point; use it when implementation starts.
+- **Third-party research** — whenever information about a third-party project is needed (APIs, CLI, runtime behavior, releases, internals), research it through the `deepwiki` MCP against that project's GitHub repository (e.g. Bun via `oven-sh/bun`, Shlink via `shlinkio/shlink`, its JS SDK via `shlinkio/shlink-js-sdk`). The `deepwiki` skill in `.claude/skills/deepwiki/` describes the workflow; the MCP server is declared in `.mcp.json` and pre-approved in `.claude/settings.json` (`enabledMcpjsonServers` plus the `mcp__deepwiki__*` allow rule), so it connects without a first-use prompt.
 
 ## Conventions
 

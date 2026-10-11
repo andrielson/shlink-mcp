@@ -10,6 +10,20 @@ Derived from
 [bun-devops-template](https://github.com/andrielson/bun-devops-template), a
 GitHub template for Bun-based DevOps projects.
 
+## Resources
+
+- [Shlink](https://shlink.io) — the URL shortener this server targets.
+- [Shlink documentation](https://shlink.io/documentation) — the REST API
+  reference.
+- [Shlink JS SDK](https://js-sdk.shlink.io)
+  ([source](https://github.com/shlinkio/shlink-js-sdk)) — the official
+  TypeScript SDK for Shlink's API; whether this server builds on it is not
+  decided yet.
+- [Shlink source](https://github.com/shlinkio/shlink) — the server-side
+  implementation of the REST API.
+- [Model Context Protocol](https://modelcontextprotocol.io) — the protocol
+  this server speaks.
+
 ## Prerequisites
 
 - **Bun** (1.4+) — runs the scripts, the test suite and the git hooks.
@@ -100,6 +114,10 @@ The repository ships coding-agent tooling alongside the code:
 - **mattpocock-skills plugin** — `.claude/settings.json` enables the
   `mattpocock-skills` Claude Code plugin, which provides the engineering
   skills those workflow docs refer to.
+- **mcp-server-dev plugin** — `.claude/settings.json` also enables the
+  `mcp-server-dev` Claude Code plugin, the reference tooling for building
+  the MCP server itself (deployment model, tool-design patterns,
+  packaging) when implementation starts.
 
 ## Conventions
 

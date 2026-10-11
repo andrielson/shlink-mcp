@@ -1,5 +1,6 @@
 {
   "name": "shlink-mcp",
+  "description": "A Model Context Protocol (MCP) server for Shlink, the self-hosted URL shortener.",
   "scripts": {
     "format": "prettier --write .",
     "format:check": "prettier --check .",
