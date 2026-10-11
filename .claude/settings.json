@@ -5,6 +5,7 @@
   "enabledMcpjsonServers": ["deepwiki"],
   "enabledPlugins": {
     "mattpocock-skills@claude-plugins-official": true,
-    "mcp-server-dev@claude-plugins-official": true
+    "mcp-server-dev@claude-plugins-official": true,
+    "claude-md-management@anthropic-plugin-directory": true
   }
 }
