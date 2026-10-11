@@ -2,9 +2,9 @@
 description: Patterns for invoking the GitHub CLI (gh) from agents. Covers structured output, pagination, repo targeting, search vs list, gh api fallback.
 metadata:
   github-path: skills/gh
-  github-ref: refs/tags/v2.100.0
+  github-ref: refs/tags/v2.102.0
   github-repo: https://github.com/cli/cli
-  github-tree-sha: 5cf8c343d459cc0fdd839100c02b6fbb1ddda8e1
+  github-tree-sha: a4791f98e9351d4a76e6be7716371807b3fdb087
 name: gh
 ---
 
@@ -131,7 +131,8 @@ blocked-by/blocking relationships.
   of `--body`, `--body-file`, or `--editor`.
 - Uploads require GitHub.com or a GHE.com tenant, an OAuth token, classic PAT,
   or fine-grained PAT, and `WRITE`, `MAINTAIN`, or `ADMIN` repository
-  permission. GitHub Enterprise Server and GitHub App tokens are unsupported.
+  permission. GitHub Enterprise Server and most GitHub App tokens are
+  unsupported.
 - Uploads stop at the first failure. If earlier files uploaded, `gh` still
   writes those attachments and exits non-zero. Create and edit commands also
   print the issue or pull request URL.
