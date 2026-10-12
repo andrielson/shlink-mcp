@@ -207,6 +207,15 @@ VS Code is preconfigured (`.vscode/`, `.editorconfig`) to format on save
 with the same tools as the hooks: Biome for the TS family, the Prettier
 extension for markdown, YAML, shell and Dockerfile.
 
+## Continuous integration
+
+[`.github/workflows/ci.yaml`](.github/workflows/ci.yaml) runs on every push to
+`main` and every pull request: the gates (Biome, Prettier check, type check,
+ShellCheck) and the full `bun test` — integration tier included. The suite
+starts and stops its own ephemeral Shlink on the runner's preinstalled Docker,
+so the workflow needs no services and no secrets; the Bun version comes from
+`package.json`'s `packageManager` field.
+
 ## Agent tooling
 
 The repository ships coding-agent tooling alongside the code:
