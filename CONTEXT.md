@@ -80,7 +80,9 @@ operation each.
 
 **Null-clears**:
 The update convention: an explicit `null` in a tool argument clears the field
-in Shlink, an omitted argument leaves it unchanged.
+in Shlink, an omitted argument leaves it unchanged. On the wire, tags are the
+exception — Shlink ignores `tags: null` on PATCH, so the server sends the
+empty array to clear them.
 
 ### Testing
 

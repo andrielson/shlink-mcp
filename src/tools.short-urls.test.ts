@@ -155,7 +155,7 @@ describe('get_short_url', () => {
 })
 
 describe('update_short_url', () => {
-  test('passes explicit nulls through and omits unset fields', async () => {
+  test('passes explicit nulls through, omits unset fields, and clears tags as an empty array', async () => {
     const { fake, result } = await call('update_short_url', {
       shortCode: 'abc',
       title: null,
@@ -169,7 +169,10 @@ describe('update_short_url', () => {
     expect(fake.calls).toEqual([
       {
         method: 'updateShortUrl',
-        args: [{ shortCode: 'abc' }, { title: null, tags: null, validUntil: null, maxVisits: null, crawlable: true }],
+        // tags is the exception: Shlink ignores `tags: null` on PATCH — the
+        // wire form of "clear every tag" is the empty array (found by the
+        // integration tier against the real instance).
+        args: [{ shortCode: 'abc' }, { title: null, tags: [], validUntil: null, maxVisits: null, crawlable: true }],
       },
     ])
   })

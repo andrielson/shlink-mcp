@@ -69,18 +69,18 @@ the target instance.
 
 ## Commands
 
-| Command                | What it does                                                                           |
-| ---------------------- | -------------------------------------------------------------------------------------- |
-| `bun install`          | Install dependencies (and activate the git hooks)                                      |
-| `bun run lint`         | Biome check (TS family)                                                                |
-| `bun run lint:fix`     | Biome check with auto-fix                                                              |
-| `bun run lint:sh`      | ShellCheck over the tracked shell scripts                                              |
-| `bun run format`       | Prettier write (markdown/YAML/shell/Dockerfile)                                        |
-| `bun run format:check` | Prettier check, no changes applied                                                     |
-| `bun run typecheck`    | `tsc --noEmit`                                                                         |
-| `bun test`             | Run the test suite ([Bun's test runner](https://bun.com/docs/test-writer) is built in) |
-| `bun src/index.ts`     | Run the MCP server (see [Running the server](#running-the-server))                     |
-| `bun build <entry>`    | Bundle an entrypoint (`.ts`, `.html`, `.css`)                                          |
+| Command                | What it does                                                                                                                                                             |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `bun install`          | Install dependencies (and activate the git hooks)                                                                                                                        |
+| `bun run lint`         | Biome check (TS family)                                                                                                                                                  |
+| `bun run lint:fix`     | Biome check with auto-fix                                                                                                                                                |
+| `bun run lint:sh`      | ShellCheck over the tracked shell scripts                                                                                                                                |
+| `bun run format`       | Prettier write (markdown/YAML/shell/Dockerfile)                                                                                                                          |
+| `bun run format:check` | Prettier check, no changes applied                                                                                                                                       |
+| `bun run typecheck`    | `tsc --noEmit`                                                                                                                                                           |
+| `bun test`             | Run the test suite ([Bun's test runner](https://bun.com/docs/test-writer) is built in; the integration tier starts and stops the ephemeral Shlink, so Docker must be up) |
+| `bun src/index.ts`     | Run the MCP server (see [Running the server](#running-the-server))                                                                                                       |
+| `bun build <entry>`    | Bundle an entrypoint (`.ts`, `.html`, `.css`)                                                                                                                            |
 
 ## Ephemeral test Shlink
 
@@ -88,17 +88,35 @@ Integration tests and local development run against a disposable Shlink
 instance defined in [`tests/compose.yaml`](tests/compose.yaml): a pinned
 latest-stable Shlink on its default SQLite database, with no mounted volumes —
 every start is a fresh instance (the initial API key is applied on first boot,
-~6s to healthy), and every stop discards all data.
+~6s to healthy), and every stop discards all data. `bun test` starts and stops
+it by itself; to drive one manually (for local development against a
+longer-lived instance):
 
 ```bash
 docker compose --file tests/compose.yaml up --detach --wait # start, wait healthy
 docker compose --file tests/compose.yaml down               # stop, discard all data
 ```
 
+The suite uses a **per-worktree compose identity**: the project name and
+published port are generated once by [`tests/compose-project.ts`](tests/compose-project.ts)
+and recorded in a gitignored `tests/.env`, which compose auto-loads — so
+parallel worktrees each own their instance, and manual invocations above aim
+at the same project and port as the suite (recorded in `SHLINK_TEST_PORT`,
+falling back to 18080 before the first suite run).
+
+| Variable               | Meaning                                                                                                               | Default               |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------------- | --------------------- |
+| `SHLINK_TEST_HOST`     | Host the published port is reachable on                                                                               | `127.0.0.1`           |
+| `SHLINK_TEST_PORT`     | Published port (the per-worktree identity's record)                                                                   | `18080`               |
+| `SHLINK_TEST_API_KEY`  | API key the suite sends                                                                                               | `shlink-mcp-test-key` |
+| `SHLINK_TEST_BASE_URL` | Total override: an already-running external instance; the suite then starts and stops no compose lifecycle of its own | —                     |
+
+`SHLINK_TEST_HOST` exists for remote Docker daemons, whose published ports
+are not reachable on `127.0.0.1` — this workspace sets it to the docker-host
+gateway (`172.18.0.1`) in a gitignored root `.env`, which Bun auto-loads.
+
 | Setting              | Value                                                           |
 | -------------------- | --------------------------------------------------------------- |
-| Base URL             | `http://localhost:18080` (override with `SHLINK_TEST_PORT`)     |
-| API key              | `shlink-mcp-test-key` (override with `SHLINK_TEST_API_KEY`)     |
 | Default short domain | `s.test`                                                        |
 | Health endpoint      | `GET /rest/health` (no auth) — the compose healthcheck polls it |
 
