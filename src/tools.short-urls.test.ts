@@ -86,7 +86,7 @@ describe('list_short_urls', () => {
 
     const output = await result
     expect(output.isError).toBeTrue()
-    expect(output.content[0]?.text).toBe('Could not talk to the Shlink server: fetch failed')
+    expect(output.content[0]?.text).toBe('Could not talk to the Shlink instance: fetch failed')
   })
 })
 

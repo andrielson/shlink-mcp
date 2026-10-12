@@ -55,7 +55,7 @@ export function toToolError(error: unknown): { content: Array<{ type: 'text'; te
   const text = isProblemDetails(error)
     ? shlinkErrorLine(error)
     : error instanceof Error
-      ? `Could not talk to the Shlink server: ${error.message}`
+      ? `Could not talk to the Shlink instance: ${error.message}`
       : `Unexpected error: ${String(error)}`
   return { content: [{ type: 'text', text }], isError: true }
 }

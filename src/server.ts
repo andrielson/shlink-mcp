@@ -7,7 +7,7 @@ import type { ShlinkApiClient } from '@shlinkio/shlink-js-sdk/api-contract'
 
 import pkg from '../package.json' with { type: 'json' }
 import { credentialsFrom } from './credentials.ts'
-import { isProblemDetails, problemResponse, ShlinkApiClientError } from './errors.ts'
+import { isProblemDetails, problemResponse } from './errors.ts'
 import { type ClientFactory, defaultClientFactory } from './shlink-client.ts'
 import { TOOLS } from './tools.ts'
 
@@ -64,24 +64,33 @@ function registerTools(server: McpServer, client: ShlinkApiClient | null): void 
 
 // One lightweight authenticated call: a bad key or unreachable server fails
 // the MCP connection itself (initialize), not the first tool call later.
+// Only auth rejections (401/403) mean bad credentials — any other problem
+// from the instance is an upstream failure, not the client's fault.
 async function credentialProbe(client: ShlinkApiClient): Promise<Response | null> {
   try {
     await client.listShortUrls({ page: '1', itemsPerPage: 1 })
     return null
   } catch (error) {
-    if (error instanceof ShlinkApiClientError || isProblemDetails(error)) {
-      const detail = isProblemDetails(error) ? error.detail : 'the target instance rejected the request'
+    if (isProblemDetails(error)) {
+      if (error.status === 401 || error.status === 403) {
+        return problemResponse(
+          401,
+          'invalid-credentials',
+          'Shlink rejected the credentials',
+          `X-Api-Key / X-Shlink-Server-Url were rejected by the target Shlink instance: ${error.detail}`,
+        )
+      }
       return problemResponse(
-        401,
-        'invalid-credentials',
-        'Shlink rejected the credentials',
-        `X-Api-Key / X-Shlink-Server-Url were rejected by the target Shlink instance: ${detail}`,
+        502,
+        'shlink-error',
+        'The Shlink instance returned an error',
+        `The credential probe failed with an unexpected error: ${error.detail} (HTTP ${error.status})`,
       )
     }
     return problemResponse(
       502,
       'shlink-unreachable',
-      'Could not reach the Shlink server',
+      'Could not reach the Shlink instance',
       `The X-Shlink-Server-Url target could not be reached: ${error instanceof Error ? error.message : String(error)}`,
     )
   }

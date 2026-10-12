@@ -104,7 +104,7 @@ describe('toToolError', () => {
 
     expect(result.isError).toBeTrue()
     if (result.content[0]?.type !== 'text') throw new Error('unreachable')
-    expect(result.content[0].text).toBe('Could not talk to the Shlink server: fetch failed')
+    expect(result.content[0].text).toBe('Could not talk to the Shlink instance: fetch failed')
   })
 
   test('maps an unknown thrown value to the unexpected line', () => {
