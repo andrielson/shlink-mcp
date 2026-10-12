@@ -33,9 +33,9 @@ ENV NODE_ENV=production
 EXPOSE 3000
 
 # Exec form cannot expand ${PORT}, so the one-liner reads the env itself
-# (top-level await works in `bun -e`). /health is the unauthenticated
+# (top-level await works in `bun --eval`). /health is the unauthenticated
 # liveness route.
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD ["bun", "-e", "const port = Number(process.env.PORT ?? 3000); const response = await fetch(`http://127.0.0.1:${port}/health`); if (!response.ok) process.exit(1);"]
+  CMD ["bun", "--eval", "const port = Number(process.env.PORT ?? 3000); const response = await fetch(`http://127.0.0.1:${port}/health`); if (!response.ok) process.exit(1);"]
 
 CMD ["bun", "dist/index.js"]

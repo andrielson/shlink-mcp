@@ -62,8 +62,9 @@ offers `GET /health` for liveness. For the personal deploy, see
 
 ## Connecting an MCP client
 
-The server is unconfigured and stateless: every request names its target
-Shlink instance through two headers, and Shlink itself is the authenticator.
+The server is unconfigured and stateless, speaking MCP over Streamable HTTP:
+every request names its target Shlink instance through two headers, and
+Shlink itself is the authenticator.
 
 | Header                | Value                                                                                                       |
 | --------------------- | ----------------------------------------------------------------------------------------------------------- |
