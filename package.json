@@ -1,5 +1,6 @@
 {
   "name": "shlink-mcp",
+  "version": "0.1.0",
   "description": "A Model Context Protocol (MCP) server for Shlink, the self-hosted URL shortener.",
   "scripts": {
     "format": "prettier --write .",
@@ -9,6 +10,11 @@
     "lint:sh": "git ls-files -- '*.sh' '*.bash' ':!:.claude/worktrees' | xargs --no-run-if-empty shellcheck",
     "prepare": "husky",
     "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/server": "2.3.1",
+    "@shlinkio/shlink-js-sdk": "^3.2.1",
+    "zod": "^4.2.0"
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.15",

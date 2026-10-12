@@ -2,9 +2,12 @@
 
 A [Model Context Protocol](https://modelcontextprotocol.io) server for
 [Shlink](https://shlink.io), the self-hosted URL shortener: it exposes
-Shlink's REST API as tools for MCP clients. The server itself is not
-implemented yet — the repository currently holds the prewired quality
-tooling, git hooks and agent tooling, ready for the first source files.
+Shlink's REST API as twelve fine-grained tools for MCP clients, speaking
+Streamable HTTP. The server is a stateless translator: it keeps no accounts
+and no Shlink configuration of its own — every request names the target
+instance through two headers (`X-Api-Key`, `X-Shlink-Server-Url`), and Shlink
+itself is the authenticator. See [ADR 0001](docs/adr/0001-stateless-per-request-credentials.md)
+for why, and [`CONTEXT.md`](CONTEXT.md) for the project's vocabulary.
 
 Derived from
 [bun-devops-template](https://github.com/andrielson/bun-devops-template), a
@@ -17,8 +20,7 @@ GitHub template for Bun-based DevOps projects.
   reference.
 - [Shlink JS SDK](https://js-sdk.shlink.io)
   ([source](https://github.com/shlinkio/shlink-js-sdk)) — the official
-  TypeScript SDK for Shlink's API; whether this server builds on it is not
-  decided yet.
+  TypeScript SDK this server's client layer builds on.
 - [Shlink source](https://github.com/shlinkio/shlink) — the server-side
   implementation of the REST API.
 - [Model Context Protocol](https://modelcontextprotocol.io) — the protocol
@@ -45,6 +47,26 @@ bun install
 points `core.hooksPath` at `.husky/_`, so a fresh clone needs zero manual
 setup.
 
+## Running the server
+
+```bash
+bun src/index.ts
+```
+
+The server listens on `http://localhost:3000/mcp` (override with `PORT`) and
+offers `GET /health` for liveness. Point an MCP client at it with the two
+credential headers, e.g.:
+
+```bash
+claude mcp add --transport http shlink http://localhost:3000/mcp \
+  --header "X-Api-Key: <shlink-api-key>" \
+  --header "X-Shlink-Server-Url: https://s.example.com"
+```
+
+The server URL is the instance's plain base URL — no `/rest/v3` suffix. For
+local development, the [ephemeral test Shlink](#ephemeral-test-shlink) plays
+the target instance.
+
 ## Commands
 
 | Command                | What it does                                                                           |
@@ -57,6 +79,7 @@ setup.
 | `bun run format:check` | Prettier check, no changes applied                                                     |
 | `bun run typecheck`    | `tsc --noEmit`                                                                         |
 | `bun test`             | Run the test suite ([Bun's test runner](https://bun.com/docs/test-writer) is built in) |
+| `bun src/index.ts`     | Run the MCP server (see [Running the server](#running-the-server))                     |
 | `bun build <entry>`    | Bundle an entrypoint (`.ts`, `.html`, `.css`)                                          |
 
 ## Ephemeral test Shlink
