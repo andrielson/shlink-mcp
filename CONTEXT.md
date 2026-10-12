@@ -70,7 +70,8 @@ instance's own key) and `X-Shlink-Server-Url` (its base URL, without
 _Avoid_: auth headers, API headers.
 
 **Credential probe**:
-The one lightweight authenticated call made at MCP initialize time so bad
+The one lightweight authenticated call made at the MCP connection handshake —
+`initialize` or `server/discover`, whichever the client opens with — so bad
 credentials or an unreachable instance fail the connection, not the first tool
 call.
 

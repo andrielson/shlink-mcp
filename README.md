@@ -102,10 +102,11 @@ Two behaviors worth knowing before the first connect:
   Shlink instance; to manage another instance, register the server again
   with different headers. One deploy can serve any number of instances —
   just never inside the same session.
-- **Fail fast at connect.** On `initialize` the server validates the
-  credentials with one lightweight authenticated call (list short URLs,
-  page 1, one item): a rejected key or an unreachable instance URL fails
-  the connection itself, not the first tool call later.
+- **Fail fast at connect.** At the connection handshake — `initialize`, or
+  `server/discover` for clients speaking the 2026-07-28 protocol — the server
+  validates the credentials with one lightweight authenticated call (list
+  short URLs, page 1, one item): a rejected key or an unreachable instance
+  URL fails the connection itself, not the first tool call later.
 
 For local development, the [ephemeral test Shlink](#ephemeral-test-shlink)
 plays the target instance.

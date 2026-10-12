@@ -7,10 +7,11 @@ import { handleRequest, type ServerDeps } from './server.ts'
 import { type FakeShlinkClient, fakeShlinkClient, rejectWith } from './testing/fake-shlink-client.ts'
 import { type McpSession, mcpSession, resultText } from './testing/mcp-session.ts'
 
-// The initialize-time credential probe and the MCP session, driven through
-// the handleRequest seam with a fake client factory — no socket, no Shlink.
+// The connection-handshake credential probe (initialize and server/discover)
+// and the MCP session, driven through the handleRequest seam with a fake
+// client factory — no socket, no Shlink.
 
-function initializeRequest(): Request {
+function handshakeRequest(method: 'initialize' | 'server/discover'): Request {
   return new Request('http://localhost:3000/mcp', {
     method: 'POST',
     headers: {
@@ -22,17 +23,22 @@ function initializeRequest(): Request {
     body: JSON.stringify({
       jsonrpc: '2.0',
       id: 1,
-      method: 'initialize',
-      params: { protocolVersion: '2025-06-18', capabilities: {}, clientInfo: { name: 'probe-test', version: '0' } },
+      method,
+      ...(method === 'initialize' && {
+        params: { protocolVersion: '2025-06-18', capabilities: {}, clientInfo: { name: 'probe-test', version: '0' } },
+      }),
     }),
   })
 }
+
+const initializeRequest = () => handshakeRequest('initialize')
+const discoverRequest = () => handshakeRequest('server/discover')
 
 function depsWith(client: ShlinkApiClient): ServerDeps {
   return { clientFactory: () => client, serverName: 'test-server', serverVersion: '0.0.0' }
 }
 
-describe('credential probe at initialize', () => {
+describe('credential probe at the connection handshake', () => {
   test('lets the request through when the probe succeeds', async () => {
     const response = await handleRequest(initializeRequest(), depsWith(fakeShlinkClient().client))
 
@@ -81,6 +87,29 @@ describe('credential probe at initialize', () => {
 
     expect(response.status).toBe(502)
     expect(body.type).toBe('urn:shlink-mcp:error:shlink-unreachable')
+  })
+
+  test('answers 401 invalid-credentials when server/discover arrives with a rejected key', async () => {
+    const fake = fakeShlinkClient({
+      listShortUrls: rejectWith({
+        type: 'https://shlink.io/api/error/invalid-api-key',
+        title: 'Invalid API key',
+        detail: 'Provided API key is invalid',
+        status: 401,
+      }),
+    })
+
+    const response = await handleRequest(discoverRequest(), depsWith(fake.client))
+    const body = (await response.json()) as { type?: string }
+
+    expect(response.status).toBe(401)
+    expect(body.type).toBe('urn:shlink-mcp:error:invalid-credentials')
+  })
+
+  test('lets server/discover through when the probe succeeds', async () => {
+    const response = await handleRequest(discoverRequest(), depsWith(fakeShlinkClient().client))
+
+    expect(response.status).toBe(200)
   })
 })
 

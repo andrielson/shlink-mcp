@@ -150,6 +150,25 @@ describe('the HTTP edge over a real socket', () => {
 
     await expect(badKeySession.initialize()).rejects.toThrow('HTTP 401')
   })
+
+  test('server/discover with a rejected key fails at the credential probe too', async () => {
+    // Discover-first clients (2026-07-28 protocol) open with server/discover
+    // before any initialize, so the probe must ride that handshake as well.
+    const response = await fetch(mcpUrl, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        accept: 'application/json, text/event-stream',
+        'x-api-key': 'wrong-key-on-purpose',
+        'x-shlink-server-url': target.baseUrl,
+      },
+      body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'server/discover', params: {} }),
+    })
+    const body = (await response.json()) as { type?: string }
+
+    expect(response.status).toBe(401)
+    expect(body.type).toBe('urn:shlink-mcp:error:invalid-credentials')
+  })
 })
 
 // ---------------------------------------------------------------------------
