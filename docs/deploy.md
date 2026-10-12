@@ -12,7 +12,7 @@ only thing it needs from the environment is a port to listen on.
 From the repository root:
 
 ```bash
-docker build --file Dockerfile --tag shlink-mcp:0.1.0 .
+docker build --file Dockerfile --tag shlink-mcp:0.1.1 .
 ```
 
 Tag with the version in [`package.json`](../package.json) (bump them
@@ -30,7 +30,7 @@ any probe config of their own.
 ## Run it
 
 ```bash
-docker run --detach --name shlink-mcp --publish 3000:3000 --restart unless-stopped shlink-mcp:0.1.0
+docker run --detach --name shlink-mcp --publish 3000:3000 --restart unless-stopped shlink-mcp:0.1.1
 ```
 
 Or, as the long-lived compose service this actually is (long syntax per repo
@@ -39,7 +39,7 @@ convention):
 ```yaml
 services:
   shlink-mcp:
-    image: shlink-mcp:0.1.0
+    image: shlink-mcp:0.1.1
     ports:
       - target: 3000
         published: "3000"
@@ -59,7 +59,7 @@ the same Docker host, publish its port and point at the host gateway:
 ```bash
 docker run --detach --name shlink-mcp --publish 3000:3000 --restart unless-stopped \
   --add-host=host.docker.internal:host-gateway \
-  shlink-mcp:0.1.0
+  shlink-mcp:0.1.1
 # X-Shlink-Server-Url: http://host.docker.internal:8080
 ```
 

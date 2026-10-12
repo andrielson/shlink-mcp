@@ -63,9 +63,9 @@ function registerTools(server: McpServer, client: ShlinkApiClient | null): void 
 }
 
 // One lightweight authenticated call: a bad key or unreachable server fails
-// the MCP connection itself (initialize), not the first tool call later.
-// Only auth rejections (401/403) mean bad credentials — any other problem
-// from the instance is an upstream failure, not the client's fault.
+// the MCP connection itself, not the first tool call later. Only auth
+// rejections (401/403) mean bad credentials — any other problem from the
+// instance is an upstream failure, not the client's fault.
 async function credentialProbe(client: ShlinkApiClient): Promise<Response | null> {
   try {
     await client.listShortUrls({ page: '1', itemsPerPage: 1 })
@@ -96,12 +96,19 @@ async function credentialProbe(client: ShlinkApiClient): Promise<Response | null
   }
 }
 
-async function isInitializeRequest(request: Request): Promise<boolean> {
+// The two handshakes a client can open a connection with: initialize
+// (2025-era protocol) and server/discover (2026-07-28, sent before any
+// initialize). The probe rides on either, so discover-first clients also
+// fail fast on bad credentials instead of at their first tool call.
+const HANDSHAKE_METHODS = ['initialize', 'server/discover']
+
+async function isHandshakeRequest(request: Request): Promise<boolean> {
   if (!(request.headers.get('content-type') ?? '').includes('application/json')) return false
   try {
     const body: unknown = await request.clone().json()
     if (Array.isArray(body) || typeof body !== 'object' || body === null) return false
-    return (body as { method?: unknown }).method === 'initialize'
+    const method = (body as { method?: unknown }).method
+    return typeof method === 'string' && HANDSHAKE_METHODS.includes(method)
   } catch {
     return false
   }
@@ -125,7 +132,7 @@ export async function handleRequest(request: Request, deps: ServerDeps = default
     )
   }
 
-  if (request.method === 'POST' && (await isInitializeRequest(request))) {
+  if (request.method === 'POST' && (await isHandshakeRequest(request))) {
     const rejection = await credentialProbe(deps.clientFactory(credentials))
     if (rejection) return rejection
   }
