@@ -33,7 +33,8 @@ GitHub template for Bun-based DevOps projects.
   gate). Shell _formatting_ needs no host binary: it goes through Prettier
   and `prettier-plugin-sh`.
 - **Docker** (with Compose) — runs the ephemeral test Shlink (see
-  [Ephemeral test Shlink](#ephemeral-test-shlink)).
+  [Ephemeral test Shlink](#ephemeral-test-shlink)) and builds the deployable
+  server image (see [Deploying with Docker](docs/deploy.md)).
 
 ## Getting started
 
@@ -49,13 +50,27 @@ setup.
 
 ## Running the server
 
+Locally, straight from source (Bun runs TypeScript natively):
+
 ```bash
 bun src/index.ts
 ```
 
 The server listens on `http://localhost:3000/mcp` (override with `PORT`) and
-offers `GET /health` for liveness. Point an MCP client at it with the two
-credential headers, e.g.:
+offers `GET /health` for liveness. For the personal deploy, see
+[Deploying with Docker](docs/deploy.md).
+
+## Connecting an MCP client
+
+The server is unconfigured and stateless: every request names its target
+Shlink instance through two headers, and Shlink itself is the authenticator.
+
+| Header                | Value                                                                                                       |
+| --------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `X-Api-Key`           | an API key of the target Shlink instance (the same key its REST API takes)                                  |
+| `X-Shlink-Server-Url` | the instance's plain base URL, e.g. `https://s.example.com` — **no** `/rest/v3` suffix (the SDK appends it) |
+
+With Claude Code:
 
 ```bash
 claude mcp add --transport http shlink http://localhost:3000/mcp \
@@ -63,9 +78,36 @@ claude mcp add --transport http shlink http://localhost:3000/mcp \
   --header "X-Shlink-Server-Url: https://s.example.com"
 ```
 
-The server URL is the instance's plain base URL — no `/rest/v3` suffix. For
-local development, the [ephemeral test Shlink](#ephemeral-test-shlink) plays
-the target instance.
+Or the equivalent block in a project's `.mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "shlink": {
+      "type": "http",
+      "url": "http://localhost:3000/mcp",
+      "headers": {
+        "X-Api-Key": "<shlink-api-key>",
+        "X-Shlink-Server-Url": "https://s.example.com"
+      }
+    }
+  }
+}
+```
+
+Two behaviors worth knowing before the first connect:
+
+- **One session, one instance.** The headers pin the session to a single
+  Shlink instance; to manage another instance, register the server again
+  with different headers. One deploy can serve any number of instances —
+  just never inside the same session.
+- **Fail fast at connect.** On `initialize` the server validates the
+  credentials with one lightweight authenticated call (list short URLs,
+  page 1, one item): a rejected key or an unreachable instance URL fails
+  the connection itself, not the first tool call later.
+
+For local development, the [ephemeral test Shlink](#ephemeral-test-shlink)
+plays the target instance.
 
 ## Commands
 

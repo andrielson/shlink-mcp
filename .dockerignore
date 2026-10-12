@@ -1,0 +1,17 @@
+# The build only COPYies package.json, bun.lock and src/ into the image, but
+# a slim context also keeps the tarball `docker build` uploads small —
+# node_modules would dwarf the whole repo. Root .env* files hold local
+# overrides (gitignored); they must never ride along in a build context.
+
+.git
+node_modules
+out
+dist
+coverage
+tests
+docs
+.claude
+.husky
+.vscode
+.env*
+scratchpad.md
