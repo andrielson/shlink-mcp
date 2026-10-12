@@ -168,6 +168,7 @@ const tags = {
 const story = {
   primary: undefined as ShortUrlRecord | undefined,
   bulkFirstCode: '',
+  visitsShortCode: '',
 }
 
 describe('the twelve frozen tools against a fresh ephemeral Shlink', () => {
@@ -216,6 +217,13 @@ describe('the twelve frozen tools against a fresh ephemeral Shlink', () => {
     expect(updated.title).toBeNull()
     expect(updated.tags).toEqual([])
     expect(updated.longUrl).toBe(`https://example.com/${stamp}-primary-v2`)
+
+    // The round trip the strategy asked for: a get afterwards shows the
+    // fields cleared, not just the update response.
+    const refetched = await toolJson<ShortUrlRecord>('get_short_url', { shortCode: story.primary?.shortCode })
+    expect(refetched.title).toBeNull()
+    expect(refetched.tags).toEqual([])
+    expect(refetched.longUrl).toBe(`https://example.com/${stamp}-primary-v2`)
   })
 
   test('list_short_urls pages with the Shlink default of 10 and the pagination envelope', async () => {
@@ -262,6 +270,7 @@ describe('the twelve frozen tools against a fresh ephemeral Shlink', () => {
       customSlug: `${stamp}-v`,
       tags: [tags.visits],
     })
+    story.visitsShortCode = created.shortCode
     await seedVisits(created.shortCode, 55, BROWSER_UA)
 
     const defaultPage = await waitFor(
@@ -385,11 +394,13 @@ describe('the twelve frozen tools against a fresh ephemeral Shlink', () => {
   })
 
   test('delete_short_url_visits returns the deleted count and empties the visit list', async () => {
-    const result = await toolJson<{ deletedVisits: number }>('delete_short_url_visits', { shortCode: `${stamp}-v` })
+    const result = await toolJson<{ deletedVisits: number }>('delete_short_url_visits', {
+      shortCode: story.visitsShortCode,
+    })
 
     expect(result.deletedVisits).toBe(55)
 
-    const visits = await toolJson<VisitsPage>('get_short_url_visits', { shortCode: `${stamp}-v` })
+    const visits = await toolJson<VisitsPage>('get_short_url_visits', { shortCode: story.visitsShortCode })
     expect(visits.pagination.totalItems).toBe(0)
     expect(visits.data).toHaveLength(0)
   })

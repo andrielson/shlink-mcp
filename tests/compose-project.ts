@@ -57,17 +57,22 @@ function composeArgs(identity: TestsIdentity): string[] {
 // override pointing at an already-running external instance.
 export function shlinkTarget(identity: TestsIdentity): { baseUrl: string; apiKey: string } {
   const apiKey = process.env.SHLINK_TEST_API_KEY ?? 'shlink-mcp-test-key'
-  const override = process.env.SHLINK_TEST_BASE_URL
-  if (override !== undefined && override !== '') return { baseUrl: override, apiKey }
+  const override = baseUrlOverride()
+  if (override !== undefined) return { baseUrl: override, apiKey }
   const host = process.env.SHLINK_TEST_HOST ?? '127.0.0.1'
   return { baseUrl: `http://${host}:${identity.port}`, apiKey }
 }
 
-// With a total base-URL override the instance is externally managed: the
-// suite must not start or stop one of its own.
-export function externallyManagedShlink(): boolean {
+// SHLINK_TEST_BASE_URL, when set to a non-empty value, is a total override
+// pointing at an already-running external instance: with it the suite must
+// not start or stop an ephemeral Shlink of its own.
+function baseUrlOverride(): string | undefined {
   const override = process.env.SHLINK_TEST_BASE_URL
-  return override !== undefined && override !== ''
+  return override !== undefined && override !== '' ? override : undefined
+}
+
+export function externallyManagedShlink(): boolean {
+  return baseUrlOverride() !== undefined
 }
 
 export async function startEphemeralShlink(identity: TestsIdentity): Promise<void> {

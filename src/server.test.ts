@@ -5,7 +5,7 @@ import type { ShlinkApiClient } from '@shlinkio/shlink-js-sdk/api-contract'
 import type { ShlinkCredentials } from './credentials.ts'
 import { handleRequest, type ServerDeps } from './server.ts'
 import { type FakeShlinkClient, fakeShlinkClient, rejectWith } from './testing/fake-shlink-client.ts'
-import { type McpSession, mcpSession } from './testing/mcp-session.ts'
+import { type McpSession, mcpSession, resultText } from './testing/mcp-session.ts'
 
 // The initialize-time credential probe and the MCP session, driven through
 // the handleRequest seam with a fake client factory — no socket, no Shlink.
@@ -134,8 +134,8 @@ describe('MCP session through the edge', () => {
     // The SDK reports schema violations as an isError tool result naming the
     // offending parameter, never letting the run function (or Shlink) see them.
     expect(message.result?.isError).toBe(true)
-    expect((message.result?.content ?? []).map((block) => block.text).join('\n')).toContain('Input validation error')
-    expect((message.result?.content ?? []).map((block) => block.text).join('\n')).toContain('itemsPerPage')
+    expect(resultText(message)).toContain('Input validation error')
+    expect(resultText(message)).toContain('itemsPerPage')
     expect(fake.calls.length).toBe(callsBefore)
   })
 

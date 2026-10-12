@@ -286,7 +286,7 @@ export const TOOLS = {
             // Tags are the null-clears exception: Shlink ignores `tags: null`
             // on PATCH, so the wire form of "clear every tag" is the empty
             // array (found by the integration tier against the real instance).
-            ...(args.tags !== undefined ? { tags: args.tags ?? [] } : {}),
+            ...and(args.tags !== undefined, { tags: args.tags ?? [] }),
             ...and(args.crawlable !== undefined, { crawlable: args.crawlable }),
             ...and(args.forwardQuery !== undefined, { forwardQuery: args.forwardQuery }),
             ...and(args.validSince !== undefined, { validSince: args.validSince }),
